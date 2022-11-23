@@ -1,0 +1,10 @@
+S -> S ENTER
+S -> ENTER
+ENTER -> BLK S a
+BLK -> RED RED RED ENTER S ENTER b
+RED -> ENTER
+RED -> a ENTER
+ENTER -> a a
+ENTER -> ENTER
+S -> b
+A -> B
