@@ -149,8 +149,3 @@ def create_token_string(file_path):
         token_array.append(token)
 
     return " ".join(token_array)
-
-
-if __name__ == "__main__":
-    token_string = create_token_string("js.txt")
-    print(token_string)

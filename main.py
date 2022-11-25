@@ -3,7 +3,8 @@ from cyk import CYK
 from cfg_converter import rulesparser, convert
 from file_processor import create_token_string
 
-if __name__ == "__main__" :
+
+if __name__ == "__main__":
     argument_parser = ArgumentParser()
     argument_parser.add_argument("path", type=str, help="Path file to parse")
     args = argument_parser.parse_args()
