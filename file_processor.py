@@ -1,13 +1,12 @@
 import re
 import sys
+import evaluator
+
 
 token_list = [
     (r'[ \t]+',                 None),  # Spaces and Tabs
     (r'/\*[\s\S]*?\*/|//.*',    None),  # Comments
     (r'\r\n?|\n',               None),  # New line
-
-    # Operation/Expression
-    (r'([A-Za-z_]\w*)\s*[^=]=[^=]\s*([^;{}]*)', "operation"),  # Assignment
 
     # Integer and String
     (r'\"[^\"\n]*\"',           "string"),
@@ -25,30 +24,6 @@ token_list = [
     (r'\-',                     "-"),
     (r'\-',                     "-"),
     (r'\=',                     "="),
-
-    #
-    # (r'\*\*=',                  "POWAS"),
-    # (r'\*\*',                   "POW"),
-    # (r'\/\/=',                  "FLOORDIVAS"),
-    # (r'\/\/',                   "FLOORDIV"),
-    # (r'\*=',                    "MULAS"),
-    # (r'/=',                     "DIVAS"),
-    # (r'\+=',                    "SUMAS"),
-    # (r'-=',                     "SUBAS"),
-    # (r'%=',                     "MODAS"),
-    # (r'\->',                    "ARROW"),
-    # (r'\+',                     "ADD"),
-    # (r'\-',                     "SUB"),
-    # (r'\*',                     "MUL"),
-    # (r'/',                      "DIV"),
-    # (r'%',                      "MOD"),
-    # (r'<=',                     "LEQ"),
-    # (r'<',                      "L"),
-    # (r'>=',                     "GEQ"),
-    # (r'>',                      "G"),
-    # (r'!=',                     "NEQ"),
-    # (r'\==',                    "ISEQ"),
-    # (r'\=(?!\=)',               "EQ"),
 
     # Keyword
     (r'\bbreak\b',              "break"),
@@ -94,8 +69,6 @@ token_list = [
     (r'\&',                     "&"),
     (r'\!',                     "!"),
 
-    # (r'\'\'\'[(?!(\'\'\'))\w\W]*\'\'\'',       "MULTILINE"),
-    # (r'\"\"\"[(?!(\"\"\"))\w\W]*\"\"\"',       "MULTILINE"),
     (r'[A-Za-z_]\w*',           "variable"),
 ]
 
@@ -110,7 +83,7 @@ def tokenizer(file_content, token_list):
     """
 
     pos = 0  # character position in the whole file_content
-    cur = 1  # character position in its current line
+    cur = 1  # matched string position in its current line
     line = 1  # current line
     tokens = []
 
@@ -124,29 +97,31 @@ def tokenizer(file_content, token_list):
 
         for t in token_list:
             pattern, tag = t
-            # if line == 1:
-            #     if pattern == newA:
-            #         pattern = r'[^\w]*[ \t]*\'\'\'[(?!(\'\'\'))\w\W]*\'\'\''
-            #     elif pattern == newB:
-            #         pattern = r'[^\w]*[ \t]*\"\"\"[(?!(\"\"\"))\w\W]*\"\"\"'
+
             regex = re.compile(pattern)
             match = regex.match(file_content, pos)
+
             if match:
 
                 if tag:
 
-                    # if tag == "operation":
-                    #     operation_string = match.string[match.start(pattern):match.end(pattern)]
-                    #
-                    #     # evaluator.check_expression(match)
+                    if tag == "variable":
+                        operation_string = match.string[match.start():match.end()]
 
-                    token = tag
-                    tokens.append(token)
+                        if evaluator.check_variable.accepts_input(operation_string):
+                            token = tag
+                            tokens.append(token)
+                        else:
+                            break
+                    else:
+                        token = tag
+                        tokens.append(token)
 
                 break
 
         if not match:
             print("Syntax Error!")
+            print(f'Terjadi kesalahan pada line {line}!')
             sys.exit(1)
         else:
             pos = match.end(0)
@@ -173,10 +148,9 @@ def create_token_string(file_path):
     for token in tokens:
         token_array.append(token)
 
-    print(token_array)
-
     return " ".join(token_array)
 
 
 if __name__ == "__main__":
-    create_token_string("js.txt")
+    token_string = create_token_string("js.txt")
+    print(token_string)
