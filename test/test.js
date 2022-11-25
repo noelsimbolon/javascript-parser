@@ -1,0 +1,14 @@
+function do_something(x) {
+    // This is a sample comment
+    if (x == 0) {
+        return 0
+    }
+    else if (x + 4 == 1) {
+        if (true) {
+            return 3
+        } else {
+            return 2
+        }
+    }
+}
+  
