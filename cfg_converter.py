@@ -1,14 +1,20 @@
+import copy
+
 # list terminal for testing
-listerm = ['break','const','case','catch','continue','default','delete','else','false','finally','for','function','if','let','null','return','switch','throw','try','var','while','true','=',',',';','.',':','>','<','[',']','(',')','{','}','NaN',"'",'"','&','|','new','!','variable','operation','0','1','2','3','4','5','6','7','8','9','+','-','/','%','*','float','integer','string']
+listerm = ['break', 'const', 'case', 'catch', 'continue', 'default', 'delete', 'else', 'false', 'finally', 'for',
+           'function', 'if', 'let', 'null', 'return', 'switch', 'throw', 'try', 'var', 'while', 'true', '=', ',', ';',
+           '.', ':', '>', '<', '[', ']', '(', ')', '{', '}', 'NaN', "'", '"', '&', '|', 'new', '!', 'variable',
+           'operation', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '/', '%', '*', 'float', 'integer',
+           'string']
 
 
 def rulesparser(file):
     cfgrule = dict()
-    f = open(file,'r')
+    f = open(file, 'r')
     lines = f.readlines()
 
     for line in lines:
-        if (line != "\n") :
+        if line != "\n":
             left, right = line.strip().split(" -> ")
             if left not in cfgrule.keys():
                 cfgrule[left] = [right.split(" ")]
@@ -17,8 +23,8 @@ def rulesparser(file):
 
     return cfgrule
 
-def convert(cfg):
 
+def convert(cfg):
     # eliminate start symbol
     lefts = list(cfg.values())
     new_start = False
@@ -28,23 +34,38 @@ def convert(cfg):
                 cfg.update({'S0': [['S']]})
                 new_start = True
                 break
-    
+
     # eliminate unit production
     unit = list()
     """ delkey = list() """
-    all = cfg.items()
-    for left,right in all:
-        for rule in right:
-            if len(rule) == 1 and rule[0] not in listerm: 
-                unit.append([left,rule[0]])
-                cfg[left].remove(rule)
-                """ delkey.append(rule[0]) """
-    
-    """ delkey = list(dict.fromkeys(delkey)) """
-    for change in unit:
-        if (change[0] != change[1]):
-            for addition in cfg[change[1]]:
-                cfg[change[0]].append(addition)
+    unit_prod = True
+
+    while (unit_prod) :
+        temp = copy.deepcopy(cfg)
+        all_items = temp.items()
+        for left, right in all_items:
+            for rule in right:
+                if len(rule) == 1 and rule[0] not in listerm:
+                    unit.append([left, rule[0]])
+                    cfg[left].remove(rule)
+                    """ delkey.append(rule[0]) """
+
+        """ delkey = list(dict.fromkeys(delkey)) """
+        for change in unit:
+            if change[0] != change[1]:
+                for addition in temp[change[1]]:
+                    cfg[change[0]].append(addition)
+
+        for left, right in cfg.items():
+            for rule in right:
+                if len(rule) == 1 and rule[0] not in listerm:
+                    unit_prod = True
+                    break
+                else:
+                    unit_prod = False
+
+            if (unit_prod):
+                break
 
     """ for change in unit:
         for rules in cfg[change[0]]:
@@ -54,26 +75,25 @@ def convert(cfg):
         if key in delkey:
             cfg.pop(key) """
 
-        
     # eliminate useless production
-    useful = ['S','S0']
+    useful = ['S', 'S0']
     for term in useful:
         try:
             for prod in cfg[term]:
                 for prodterm in prod:
                     if prodterm not in useful and (prodterm not in listerm):
                         useful.append(prodterm)
-        except (KeyError):
+        except KeyError:
             continue
 
     left = list(cfg.keys())
     for key in left:
         if key not in useful:
             cfg.pop(key)
-    
+
     # eliminate terminal from RHS
     rightterm = list()
-    
+
     for left, right in cfg.items():
         for rules in right:
             if len(rules) >= 2 and any(terminal in listerm for terminal in rules):
@@ -87,7 +107,7 @@ def convert(cfg):
     ruleaddition = list()
     i = 0
     for term in rightterm:
-        ruleaddition.append([f'X{i}',term])
+        ruleaddition.append([f'X{i}', term])
         i += 1
 
     for newrule in ruleaddition:
@@ -95,27 +115,27 @@ def convert(cfg):
             nproduct = len(cfg[left])
             for j in range(nproduct):
                 if len(cfg[left][j]) >= 2:
-                    cfg[left][j] = list(map(lambda x: x.replace(newrule[1],newrule[0]), cfg[left][j]))
-        
+                    cfg[left][j] = list(map(lambda x: x.replace(newrule[1], newrule[0]), cfg[left][j]))
+
         cfg.update({newrule[0]: [[newrule[1]]]})
 
-    #eliminate more than 2 non-terminal from RHS
+    # eliminate more than 2 non-terminal from RHS
     j = 0
     listnew = list()
     for left in cfg.keys():
         nproduct = len(cfg[left])
         for i in range(nproduct):
-            while (len(cfg[left][i]) > 2):
+            while len(cfg[left][i]) > 2:
                 prev = cfg[left][i].copy()
-                new = {f'Y{j}': [[prev[0],prev[1]]]}
-                
+                new = {f'Y{j}': [[prev[0], prev[1]]]}
+
                 listnew.append(new)
 
                 for key in cfg.keys():
                     n = len(cfg[key])
                     for k in range(n):
                         item = cfg[key][k]
-                        if (len(item) > 2 and (item[0] == prev[0]) and (item[1] == prev[1])):
+                        if len(item) > 2 and (item[0] == prev[0]) and (item[1] == prev[1]):
                             cfg[key][k].pop(0)
                             cfg[key][k].pop(0)
                             cfg[key][k].insert(0, f'Y{j}')
@@ -131,7 +151,7 @@ def convert(cfg):
 
     return cfg, start_symbol
 
-    
+
 # test CNF result
 """ cfg = rulesparser("cfg.txt")
 convert(cfg)
