@@ -1,6 +1,6 @@
 from automata.fa.dfa import DFA
 
-# Variable expression using FA
+# Variable evaluation using FA
 check_variable = DFA(
     states={'q0', 'q1', 'q2'},
     input_symbols={'`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=',
@@ -984,9 +984,9 @@ check_expression = DFA(
     final_states={'q3', 'q13', 'q14', 'q15', 'q24', 'q32', 'q45'}
 )
 
-'''
-if check_expression.accepts_input("test + 1 (-2)"):
-    print('Accepted')
-else:
-    print('Rejected')
-'''
+
+# if check_expression.accepts_input("x + 'asdasdasd' 'a'"):
+#     print('Accepted')
+# else:
+#     print('Rejected')
+
