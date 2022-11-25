@@ -1,13 +1,13 @@
 # contoh CNF dari PR 9
-R = {
+""" R = {
     "S": [["A", "B"], ["B", "C"]],
     "A": [["B", "A"], ["a"]],
     "B": [["C", "C"], ["b"]],
     "C": [["A", "B"], ["a"]]
-}
+} """
 
 
-def CYK(string, start_symbol):
+def CYK(string, start_symbol, cfg):
     word = string.split(" ")
     nString = len(word)
     cykTable = [[set([]) for i in range(nString)] for j in range(nString)]
@@ -15,13 +15,13 @@ def CYK(string, start_symbol):
     for i in range(nString):
         for j in range(nString - i):
             if i == 0:
-                for left, right in R.items():
+                for left, right in cfg.items():
                     for term in right:
                         if len(term) == 1 and term[0] == word[j]:
                             cykTable[j][j].add(left)
             else:
                 for k in range(i):
-                    for left, right in R.items():
+                    for left, right in cfg.items():
                         for term in right:
                             if (len(term) == 2 and term[0] in cykTable[j][k + j] and term[1] in cykTable[j + k + 1][
                                 i + j]):
@@ -34,8 +34,9 @@ def CYK(string, start_symbol):
 
 
 # testing
-test_string = input("Input string: ")
+""" test_string = input("Input string: ")
 if CYK(test_string, "S"):
     print(f"'{test_string}' is in languange")
 else:
     print(f"'{test_string}' not in languange")
+ """
